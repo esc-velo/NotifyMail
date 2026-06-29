@@ -4,39 +4,39 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are an advanced AI email triage assistant for a female computer science student specializing in Machine Learning, AI, and Software Engineering. Your objective is to filter noise while ensuring no critical academic, hackathon, or career opportunity is missed.\n\nAnalyze the following incoming email payload and generate a strictly valid JSON response.\n\n### EMAIL PAYLOAD\nFrom Name: {{ $json.senderName }}\nFrom Email: {{ $json.senderEmail }}\nSubject: {{ $json.subject }}\nDate: {{ $json.date }}\nSnippet: {{ $json.snippet }}\n\n### CRITICAL INCLUSION RULE (CRITICAL FOR HACKATHONS)\nYou MUST set \"shouldNotify\": true and classify as \"hackathon\" or \"opportunity\" if the email subject or snippet contains corporate campus innovation challenges, coding runways, or flagship hackathons targeting engineering students (e.g., \"WeForShe\", \"HackerRamp\", \"Hacker-ramp\", \"Tech Runway\", \"CodeAgility\", \"Campus Challenge\", \"Innovation Track\", \"Code With Us\", or similar corporate-sponsored talent hunts). \n\nEven if the email mentions \"Social Media Contest\", \"Promotional Launch\", or comes from a brand's marketing handle, if it links to a technical competition or registration track that offers cash prizes, certificates, or Pre-Placement Interviews (PPIs), it is an automatic TRUE.\n\n### CLASSIFICATION TAXONOMY\n- URGENT: Action required within 48 hours (e.g., interview scheduling, registration closing soon).\n- HIGH: Action required, but not immediate (e.g., flagship hackathons opening, internship registration).\n- MEDIUM: Informational but highly relevant (e.g., team formation updates, milestone reached).\n- LOW: Informational/Skimmable (e.g., tech newsletters, general community digests).\n\n### RULES FOR \"shouldNotify\"\n- Set to TRUE ONLY if the email requires a direct action, a response, or contains an opportunity for an internship, hackathon, tech competition, scholarship, or academic requirement.\n- Set to FALSE for rejections (with no next steps), pure marketing/promotional fluff (sales, discounts), general product update newsletters, or receipts.\n\n### OUTPUT FORMAT\nReturn ONLY a raw JSON object. Do not include conversational filler, markdown formatting blocks (like ```json), or trailing text. If a piece of data is missing or cannot be inferred, use null.\n\n{\n  \"shouldNotify\": false,\n  \"priority\": \"low\",\n  \"category\": \"other\",\n  \"summary\": \"String. Exact, concise description of the sender and core call-to-action. No generic phrases.\",\n  \"whyImportant\": \"String. Concrete impact statement detailing career/technical relevance (e.g., 'Flagship women-in-tech hackathon offering PPI opportunities with Myntra'). null if not important.\",\n  \"suggestedAction\": \"String. The immediate next physical or digital step the user must take.\",\n  \"deadlineOrTime\": \"String or null. ISO format YYYY-MM-DD if explicitly mentioned, otherwise raw string extract, null if none.\",\n  \"discordTitle\": \"String. Action-oriented title under 50 characters (e.g., '🔥 Myntra WeForShe Registration Open').\"\n}",
+        "text": "=You are an advanced AI email triage assistant for a female computer science student specializing in Machine Learning, AI, and Software Engineering. Your objective is to filter noise while ensuring no critical academic, hackathon, or career opportunity is missed.\n\nAnalyze the following incoming email payload and generate a strictly valid JSON response.\n\n### EMAIL PAYLOAD\nFrom Name: {{ $json.senderName }}\nFrom Email: {{ $json.senderEmail }}\nSubject: {{ $json.subject }}\nDate: {{ $json.date }}\nSnippet: {{ $json.snippet }}\n\n### CRITICAL INCLUSION RULE\nSet shouldNotify TRUE automatically if the email contains any corporate hackathon, coding competition, campus challenge, or talent hunt — even if it arrives from a marketing/brand sender. PPI opportunities, cash prizes, or certificates = automatic TRUE.\n\n### CLASSIFICATION TAXONOMY\n- URGENT: Action required within 48 hours (e.g., interview scheduling, registration closing soon).\n- HIGH: Action required, but not immediate (e.g., flagship hackathons opening, internship registration).\n- MEDIUM: Informational but highly relevant (e.g., team formation updates, milestone reached).\n- LOW: Informational/Skimmable (e.g., tech newsletters, general community digests).\n\n### RULES FOR \"shouldNotify\"\n- Set to TRUE ONLY if the email requires a direct action, a response, or contains an opportunity for an internship, hackathon, tech competition, scholarship, or academic requirement.\n- Set to FALSE for rejections (with no next steps), pure marketing/promotional fluff (sales, discounts), general product update newsletters, or receipts.\n\n### OUTPUT FORMAT\nReturn ONLY a raw JSON object. Do not include conversational filler, markdown formatting blocks (like ```json), or trailing text. If a piece of data is missing or cannot be inferred, use null.\n\n{\n  \"shouldNotify\": false,\n  \"priority\": \"low\",\n  \"category\": \"other\",\n  \"summary\": \"String. Exact, concise description of the sender and core call-to-action. No generic phrases.\",\n  \"whyImportant\": \"String. Concrete impact statement detailing career/technical relevance (e.g., 'Flagship women-in-tech hackathon offering PPI opportunities with Myntra'). null if not important.\",\n  \"suggestedAction\": \"String. The immediate next physical or digital step the user must take.\",\n  \"deadlineOrTime\": \"String or null. ISO format YYYY-MM-DD if explicitly mentioned, otherwise raw string extract, null if none.\",\n  \"discordTitle\": \"String. Action-oriented title under 50 characters (e.g., '🔥 Myntra WeForShe Registration Open').\"\n}",
         "hasOutputParser": true,
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        -96,
-        -336
+        864,
+        176
       ],
-      "id": "77c9adbe-fc1a-48c9-bf31-ee82b2e3c6fb",
+      "id": "750ff90c-8deb-49d5-aaba-cb060d5029ad",
       "name": "Basic LLM Chain"
     },
     {
       "parameters": {
         "model": "llama-3.1-8b-instant",
         "options": {
-          "maxTokensToSample": 800,
+          "maxTokensToSample": 300,
           "temperature": 0.4
         }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        -112,
-        -144
+        848,
+        368
       ],
-      "id": "0648ddbc-cfa7-4e8a-8a9c-d0634bbeffd2",
+      "id": "c70223eb-d078-4e1a-a74a-380e9c0b968d",
       "name": "Groq Chat Model",
       "credentials": {
         "groqApi": {
-          "id": "sOmR4O5PDsCM4Sbw",
-          "name": "Groq account 2"
+          "id": "waXiylFmYOeGgg4T",
+          "name": "Groq account"
         }
       }
     },
@@ -47,10 +47,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -464,
-        -208
+        496,
+        304
       ],
-      "id": "cd2c77a7-3b69-438a-b268-46b7c1506267",
+      "id": "3f99bc30-30e5-446d-9b5c-aa1ef351ceb1",
       "name": "Loop Over Items"
     },
     {
@@ -65,10 +65,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        704,
-        -160
+        1664,
+        352
       ],
-      "id": "a173a165-1d31-4dcb-8ec4-1c2d6aba5660",
+      "id": "4fa64713-617d-4228-ab96-60f45124d203",
       "name": "HTTP Request"
     },
     {
@@ -79,10 +79,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -304,
-        -384
+        656,
+        128
       ],
-      "id": "57c5a48e-65fa-4f21-97a7-62c649b2529d",
+      "id": "f01c0801-c712-4a45-b434-2dbcd78e88f2",
       "name": "Normalize Email"
     },
     {
@@ -93,10 +93,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        224,
-        -288
+        1184,
+        224
       ],
-      "id": "f736751c-1b30-4650-b12b-a1042def9b27",
+      "id": "53f8764d-9b83-4ff8-844e-cfd8aa603e3b",
       "name": "Parse AI Result"
     },
     {
@@ -110,15 +110,15 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        -944,
-        -160
+        16,
+        352
       ],
-      "id": "200c4b9a-8bbd-43fe-babe-532073a4df1e",
+      "id": "e64b8d94-db66-4a4f-9c84-c335786334ea",
       "name": "Get many messages1",
       "webhookId": "19da5b07-76bf-4ac9-8178-752112173989",
       "credentials": {
         "gmailOAuth2": {
-          "id": "APQOkaXnie1NSekG",
+          "id": "qWEcVCcfk9FYc9DT",
           "name": "Gmail account 2"
         }
       }
@@ -134,15 +134,15 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        -960,
-        -384
+        0,
+        128
       ],
-      "id": "c3390be2-e756-4e5a-99ea-8febd49f4028",
+      "id": "7175caa4-579d-445e-9d4a-9f21347e9979",
       "name": "Get many messages",
       "webhookId": "19da5b07-76bf-4ac9-8178-752112173989",
       "credentials": {
         "gmailOAuth2": {
-          "id": "n5Nmbe0DCxc9cwOq",
+          "id": "YW8V1V8N4P1d5EP5",
           "name": "Gmail account"
         }
       }
@@ -150,30 +150,30 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "18780453-08cc-40be-b672-5dfb6101e640",
+        "path": "fetch-emails",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1264,
-        -272
+        -304,
+        240
       ],
-      "id": "6b849989-7257-4d58-bf3d-44533f827b93",
+      "id": "20754665-4e90-4a15-ae5b-59794ad38271",
       "name": "Webhook",
       "webhookId": "18780453-08cc-40be-b672-5dfb6101e640"
     },
     {
       "parameters": {
-        "amount": 2
+        "amount": 12
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        16,
-        96
+        976,
+        608
       ],
-      "id": "bc8a4696-e2dc-472f-ba5a-25742a954645",
+      "id": "4f327eed-8659-470d-9e28-ea794fa826a1",
       "name": "Wait",
       "webhookId": "bfd249d7-70b8-4568-9516-d902f75548f8"
     },
@@ -183,32 +183,32 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict",
+            "typeValidation": "loose",
             "version": 3
           },
           "conditions": [
             {
               "id": "3e93e81e-4e71-4b48-aef5-29f601ea495b",
-              "leftValue": "$json.ai.shouldNotify",
-              "rightValue": "true",
+              "leftValue": "={{ $json.ai.shouldNotify }}",
+              "rightValue": "={{true}}",
               "operator": {
                 "type": "string",
-                "operation": "equals",
-                "name": "filter.operator.equals"
+                "operation": "equals"
               }
             }
           ],
           "combinator": "and"
         },
+        "looseTypeValidation": true,
         "options": {}
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        400,
-        -208
+        1360,
+        304
       ],
-      "id": "26fec8e4-fa2f-40c6-8ed0-80c923a05e82",
+      "id": "6708ca02-22b8-49c2-9d17-098642a17d0d",
       "name": "If"
     },
     {
@@ -216,10 +216,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -688,
-        -288
+        272,
+        224
       ],
-      "id": "21cb557b-403f-46f1-b74b-1ea8169cba3f",
+      "id": "3f62295f-696e-4eee-9174-fdb54c2c750d",
       "name": "Merge"
     },
     {
@@ -227,10 +227,10 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        528,
-        160
+        1488,
+        672
       ],
-      "id": "818150c4-29e4-4c1b-8103-4dc98d0243c0",
+      "id": "726704b6-35f5-4f46-ba95-ad4612d8e7eb",
       "name": "No Operation, do nothing"
     }
   ],
@@ -393,16 +393,18 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": false
   },
-  "versionId": "b5a26b40-5af7-487c-a404-5321e2045b6f",
+  "versionId": "3804c2a9-93f9-4fd7-8f35-43f3181f9e87",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "b961653a0ae8e1512e2a2dacccfffa842223f5f1206a08070aa08a103ef05c15"
+    "instanceId": "0eb25559c6c5b4dc70df131e50f5b46e200be12b74b56c1aeb82f3b41bc1b1f5"
   },
-  "id": "dcSS7XIejtGbkN2S",
+  "nodeGroups": [],
+  "id": "LOjCszD9BFiobgml",
   "tags": []
 }
