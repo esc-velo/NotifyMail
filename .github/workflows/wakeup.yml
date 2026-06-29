@@ -1,0 +1,19 @@
+name: Wake up n8n and Trigger Workflow
+
+on:
+  schedule:
+    - cron: '30 1,13 * * *'
+jobs:
+  ping-n8n:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake up Render
+        run: |
+          curl -s https://notifymail.onrender.com || true
+
+      - name: Wait for cold start
+        run: sleep 60
+
+      - name: Trigger workflow
+        run: |
+          curl -X POST https://notifymail.onrender.com/webhook/fetch-emails

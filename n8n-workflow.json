@@ -4,15 +4,15 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are an email triage assistant for a computer science student.\n\nAnalyze this email and return ONLY valid JSON, no markdown, no extra text.\n\nFrom: {{ $json.senderName }} <{{ $json.senderEmail }}>\nSubject: {{ $json.subject }}\nDate: {{ $json.date }}\nSnippet: {{ $json.snippet }}\n\nReturn exactly this structure:\n{\n  \"shouldNotify\": true or false,\n  \"priority\": \"low\" or \"medium\" or \"high\" or \"urgent\",\n  \"category\": \"internship\" or \"academic\" or \"opportunity\" or \"deadline\" or \"newsletter\" or \"promotional\" or \"other\",\n  \"summary\": \"1-2 sentence specific summary of what this email is about\",\n  \"whyImportant\": \"why this needs attention, be specific\",\n  \"suggestedAction\": \"what the user should do next\",\n  \"deadlineOrTime\": \"any deadline or time mentioned, null if none\",\n  \"discordTitle\": \"short punchy title for the notification\"\n}\n\nRules:\n- shouldNotify true ONLY for: internship updates, interview invites, application status, academic deadlines, opportunities requiring a response, goals\n- shouldNotify false for: newsletters, Medium emails, promotions, receipts, automated notifications, rejections with no action needed\n- Never return vague summaries like \"personal concern\" — be specific about sender intent",
+        "text": "=You are an advanced AI email triage assistant for a female computer science student specializing in Machine Learning, AI, and Software Engineering. Your objective is to filter noise while ensuring no critical academic, hackathon, or career opportunity is missed.\n\nAnalyze the following incoming email payload and generate a strictly valid JSON response.\n\n### EMAIL PAYLOAD\nFrom Name: {{ $json.senderName }}\nFrom Email: {{ $json.senderEmail }}\nSubject: {{ $json.subject }}\nDate: {{ $json.date }}\nSnippet: {{ $json.snippet }}\n\n### CRITICAL INCLUSION RULE (CRITICAL FOR HACKATHONS)\nYou MUST set \"shouldNotify\": true and classify as \"hackathon\" or \"opportunity\" if the email subject or snippet contains corporate campus innovation challenges, coding runways, or flagship hackathons targeting engineering students (e.g., \"WeForShe\", \"HackerRamp\", \"Hacker-ramp\", \"Tech Runway\", \"CodeAgility\", \"Campus Challenge\", \"Innovation Track\", \"Code With Us\", or similar corporate-sponsored talent hunts). \n\nEven if the email mentions \"Social Media Contest\", \"Promotional Launch\", or comes from a brand's marketing handle, if it links to a technical competition or registration track that offers cash prizes, certificates, or Pre-Placement Interviews (PPIs), it is an automatic TRUE.\n\n### CLASSIFICATION TAXONOMY\n- URGENT: Action required within 48 hours (e.g., interview scheduling, registration closing soon).\n- HIGH: Action required, but not immediate (e.g., flagship hackathons opening, internship registration).\n- MEDIUM: Informational but highly relevant (e.g., team formation updates, milestone reached).\n- LOW: Informational/Skimmable (e.g., tech newsletters, general community digests).\n\n### RULES FOR \"shouldNotify\"\n- Set to TRUE ONLY if the email requires a direct action, a response, or contains an opportunity for an internship, hackathon, tech competition, scholarship, or academic requirement.\n- Set to FALSE for rejections (with no next steps), pure marketing/promotional fluff (sales, discounts), general product update newsletters, or receipts.\n\n### OUTPUT FORMAT\nReturn ONLY a raw JSON object. Do not include conversational filler, markdown formatting blocks (like ```json), or trailing text. If a piece of data is missing or cannot be inferred, use null.\n\n{\n  \"shouldNotify\": false,\n  \"priority\": \"low\",\n  \"category\": \"other\",\n  \"summary\": \"String. Exact, concise description of the sender and core call-to-action. No generic phrases.\",\n  \"whyImportant\": \"String. Concrete impact statement detailing career/technical relevance (e.g., 'Flagship women-in-tech hackathon offering PPI opportunities with Myntra'). null if not important.\",\n  \"suggestedAction\": \"String. The immediate next physical or digital step the user must take.\",\n  \"deadlineOrTime\": \"String or null. ISO format YYYY-MM-DD if explicitly mentioned, otherwise raw string extract, null if none.\",\n  \"discordTitle\": \"String. Action-oriented title under 50 characters (e.g., '🔥 Myntra WeForShe Registration Open').\"\n}",
         "hasOutputParser": true,
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        48,
-        -304
+        -96,
+        -336
       ],
       "id": "77c9adbe-fc1a-48c9-bf31-ee82b2e3c6fb",
       "name": "Basic LLM Chain"
@@ -28,8 +28,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        32,
-        -96
+        -112,
+        -144
       ],
       "id": "0648ddbc-cfa7-4e8a-8a9c-d0634bbeffd2",
       "name": "Groq Chat Model",
@@ -65,8 +65,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        608,
-        -64
+        704,
+        -160
       ],
       "id": "a173a165-1d31-4dcb-8ec4-1c2d6aba5660",
       "name": "HTTP Request"
@@ -93,8 +93,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        352,
-        -272
+        224,
+        -288
       ],
       "id": "f736751c-1b30-4650-b12b-a1042def9b27",
       "name": "Parse AI Result"
@@ -149,31 +149,19 @@
     },
     {
       "parameters": {
+        "httpMethod": "POST",
         "path": "18780453-08cc-40be-b672-5dfb6101e640",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1152,
-        -256
+        -1264,
+        -272
       ],
       "id": "6b849989-7257-4d58-bf3d-44533f827b93",
       "name": "Webhook",
       "webhookId": "18780453-08cc-40be-b672-5dfb6101e640"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Safely grab all items from both nodes, defaulting to an empty array if one has no data\nconst account1 = $input.all('Get many messages').map(item => item.json);\nconst account2 = $input.all('Get many messages1').map(item => item.json);\n\n// Merge them together cleanly\nconst mergedEmails = [...account1, ...account2];\n\n// Format it back for n8n's loop\nreturn mergedEmails.map(email => ({ json: email }));"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -720,
-        -304
-      ],
-      "id": "9c55d165-e1e4-42c4-9d36-d84228b44994",
-      "name": "Merge script"
     },
     {
       "parameters": {
@@ -188,6 +176,62 @@
       "id": "bc8a4696-e2dc-472f-ba5a-25742a954645",
       "name": "Wait",
       "webhookId": "bfd249d7-70b8-4568-9516-d902f75548f8"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3e93e81e-4e71-4b48-aef5-29f601ea495b",
+              "leftValue": "$json.ai.shouldNotify",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        400,
+        -208
+      ],
+      "id": "26fec8e4-fa2f-40c6-8ed0-80c923a05e82",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -688,
+        -288
+      ],
+      "id": "21cb557b-403f-46f1-b74b-1ea8169cba3f",
+      "name": "Merge"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        528,
+        160
+      ],
+      "id": "818150c4-29e4-4c1b-8103-4dc98d0243c0",
+      "name": "No Operation, do nothing"
     }
   ],
   "pinData": {},
@@ -252,7 +296,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -263,9 +307,9 @@
       "main": [
         [
           {
-            "node": "Merge script",
+            "node": "Merge",
             "type": "main",
-            "index": 0
+            "index": 1
           }
         ]
       ]
@@ -274,7 +318,7 @@
       "main": [
         [
           {
-            "node": "Merge script",
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -297,7 +341,7 @@
         ]
       ]
     },
-    "Merge script": {
+    "Wait": {
       "main": [
         [
           {
@@ -308,11 +352,40 @@
         ]
       ]
     },
-    "Wait": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
       "main": [
         [
           {
             "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -325,7 +398,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "8934ed12-6877-4fb5-9182-146b96b90a1f",
+  "versionId": "b5a26b40-5af7-487c-a404-5321e2045b6f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "b961653a0ae8e1512e2a2dacccfffa842223f5f1206a08070aa08a103ef05c15"
