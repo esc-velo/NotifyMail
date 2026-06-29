@@ -1,0 +1,341 @@
+{
+  "name": "n8n Basics",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an email triage assistant for a computer science student.\n\nAnalyze this email and return ONLY valid JSON, no markdown, no extra text.\n\nFrom: {{ $json.senderName }} <{{ $json.senderEmail }}>\nSubject: {{ $json.subject }}\nDate: {{ $json.date }}\nSnippet: {{ $json.snippet }}\n\nReturn exactly this structure:\n{\n  \"shouldNotify\": true or false,\n  \"priority\": \"low\" or \"medium\" or \"high\" or \"urgent\",\n  \"category\": \"internship\" or \"academic\" or \"opportunity\" or \"deadline\" or \"newsletter\" or \"promotional\" or \"other\",\n  \"summary\": \"1-2 sentence specific summary of what this email is about\",\n  \"whyImportant\": \"why this needs attention, be specific\",\n  \"suggestedAction\": \"what the user should do next\",\n  \"deadlineOrTime\": \"any deadline or time mentioned, null if none\",\n  \"discordTitle\": \"short punchy title for the notification\"\n}\n\nRules:\n- shouldNotify true ONLY for: internship updates, interview invites, application status, academic deadlines, opportunities requiring a response, goals\n- shouldNotify false for: newsletters, Medium emails, promotions, receipts, automated notifications, rejections with no action needed\n- Never return vague summaries like \"personal concern\" — be specific about sender intent",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        48,
+        -304
+      ],
+      "id": "77c9adbe-fc1a-48c9-bf31-ee82b2e3c6fb",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "maxTokensToSample": 800,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        32,
+        -96
+      ],
+      "id": "0648ddbc-cfa7-4e8a-8a9c-d0634bbeffd2",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "sOmR4O5PDsCM4Sbw",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */6 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1056,
+        -160
+      ],
+      "id": "f50a13e8-a9b2-4258-ab23-51766fe68ea5",
+      "name": "Schedule Trigger",
+      "alwaysOutputData": false,
+      "notesInFlow": true,
+      "retryOnFail": true,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "includeSpamTrash": true,
+          "receivedAfter": "={{$now.minus({hours:12}).toISO()}}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -784,
+        -384
+      ],
+      "id": "c3390be2-e756-4e5a-99ea-8febd49f4028",
+      "name": "Get many messages",
+      "webhookId": "19da5b07-76bf-4ac9-8178-752112173989",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "n5Nmbe0DCxc9cwOq",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "includeSpamTrash": true,
+          "receivedAfter": "={{$now.minus({hours:12}).toISO()}}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -800,
+        -80
+      ],
+      "id": "200c4b9a-8bbd-43fe-babe-532073a4df1e",
+      "name": "Get many messages1",
+      "webhookId": "19da5b07-76bf-4ac9-8178-752112173989",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "APQOkaXnie1NSekG",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -592,
+        -496
+      ],
+      "id": "9f79458d-febb-41fc-a034-c2f1c47c1f28",
+      "name": "Merge",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -496,
+        -224
+      ],
+      "id": "cd2c77a7-3b69-438a-b268-46b7c1506267",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://discord.com/api/webhooks/1518681460695892028/0d-TXrFlxVty2RW0Fh9qUcBc30jikPAfwx7CTfxpJfHuB9LW2Q1Y8MUTn2L6kHiZhGza",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"content\": `## 📅 UPDATE FOR:\n**DATE:** ${$now.setZone('Asia/Kolkata').toFormat('EEEE, MMMM dd, yyyy')}\n**TIME:** ${$now.setZone('Asia/Kolkata').toFormat('hh:mm a')}\n---\n📬 **${$json.ai?.discordTitle || 'No Title'}**\n**From:** ${$(\"Normalize Email\").item.json.senderName || 'Unknown'} <${$(\"Normalize Email\").item.json.senderEmail || 'Unknown'}>\n**Subject:** ${$(\"Normalize Email\").item.json.subject || 'No Subject'}\n**Priority:** ${$json.ai?.priority || 'low'}\n**Category:** ${$json.ai?.category || 'other'}\n\n**Summary:** ${$json.ai?.summary || 'No summary parsed.'}\n**Why it matters:** ${$json.ai?.whyImportant || 'N/A'}\n**Action:** ${$json.ai?.suggestedAction || 'N/A'}\n**Deadline:** ${$json.ai?.deadlineOrTime || 'None'}\n\n🔗 ${$(\"Normalize Email\").item.json.gmailLink || ''}`\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        608,
+        -64
+      ],
+      "id": "a173a165-1d31-4dcb-8ec4-1c2d6aba5660",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function findHeader(headers, name) {\n  if (!headers) return '';\n  const header = headers.find(h => h.name?.toLowerCase() === name.toLowerCase());\n  return header?.value || '';\n}\n\nfunction extractSenderName(from) {\n  if (!from) return 'Unknown sender';\n  if (from.includes('<')) {\n    return from.split('<')[0].replace(/\"/g, '').trim() || 'Unknown sender';\n  }\n  return from;\n}\n\nfunction extractSenderEmail(from) {\n  const match = from.match(/<(.+?)>/);\n  if (match) return match[1];\n  return from;\n}\n\nconst json = $input.item.json;\nconst headers = json.payload?.headers || [];\n\nconst from = findHeader(headers, 'From') || '';\nconst subject = findHeader(headers, 'Subject') || 'No subject';\nconst date = findHeader(headers, 'Date') || '';\n\nconst messageId = json.id || '';\nconst gmailLink = messageId \n  ? `https://mail.google.com/mail/u/0/#inbox/${messageId}` \n  : '';\n\nreturn {\n  json: {\n    messageId,\n    senderName: extractSenderName(from),\n    senderEmail: extractSenderEmail(from),\n    subject,\n    date,\n    snippet: json.snippet || '',\n    gmailLink\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        -384
+      ],
+      "id": "57c5a48e-65fa-4f21-97a7-62c649b2529d",
+      "name": "Normalize Email"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const json = $input.item.json;\n\nconst raw = json.output || json.text || json.response || '';\n\nlet parsed;\n\ntry {\n  const cleaned = raw\n    .replace(/```json/g, '')\n    .replace(/```/g, '')\n    .trim();\n  parsed = JSON.parse(cleaned);\n} catch (error) {\n  parsed = {\n    shouldNotify: false,\n    priority: 'low',\n    category: 'other',\n    summary: raw.slice(0, 300),\n    whyImportant: 'AI parsing failed, review manually',\n    suggestedAction: 'Open email and check',\n    deadlineOrTime: null,\n    discordTitle: 'Email needs manual review'\n  };\n}\n\nreturn {\n  json: {\n    ...json,\n    ai: parsed\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -272
+      ],
+      "id": "f736751c-1b30-4650-b12b-a1042def9b27",
+      "name": "Parse AI Result"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        -272
+      ],
+      "id": "49138145-27c8-4fd7-b726-754167df1583",
+      "name": "Wait",
+      "webhookId": "c8f254e9-ea16-4a02-9dad-ec4bc650f492"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many messages1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Normalize Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Email": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Result": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "dd53e291-9367-4416-b126-a3207411cf16",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b961653a0ae8e1512e2a2dacccfffa842223f5f1206a08070aa08a103ef05c15"
+  },
+  "id": "dcSS7XIejtGbkN2S",
+  "tags": []
+}
