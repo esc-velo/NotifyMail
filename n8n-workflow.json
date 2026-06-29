@@ -42,97 +42,13 @@
     },
     {
       "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "cronExpression",
-              "expression": "0 */6 * * *"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.3,
-      "position": [
-        -1056,
-        -160
-      ],
-      "id": "f50a13e8-a9b2-4258-ab23-51766fe68ea5",
-      "name": "Schedule Trigger",
-      "alwaysOutputData": false,
-      "notesInFlow": true,
-      "retryOnFail": true,
-      "executeOnce": false
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "filters": {
-          "includeSpamTrash": true,
-          "receivedAfter": "={{$now.minus({hours:12}).toISO()}}"
-        }
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        -784,
-        -384
-      ],
-      "id": "c3390be2-e756-4e5a-99ea-8febd49f4028",
-      "name": "Get many messages",
-      "webhookId": "19da5b07-76bf-4ac9-8178-752112173989",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "n5Nmbe0DCxc9cwOq",
-          "name": "Gmail account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "filters": {
-          "includeSpamTrash": true,
-          "receivedAfter": "={{$now.minus({hours:12}).toISO()}}"
-        }
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        -800,
-        -80
-      ],
-      "id": "200c4b9a-8bbd-43fe-babe-532073a4df1e",
-      "name": "Get many messages1",
-      "webhookId": "19da5b07-76bf-4ac9-8178-752112173989",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "APQOkaXnie1NSekG",
-          "name": "Gmail account 2"
-        }
-      }
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        -592,
-        -496
-      ],
-      "id": "9f79458d-febb-41fc-a034-c2f1c47c1f28",
-      "name": "Merge",
-      "retryOnFail": false
-    },
-    {
-      "parameters": {
         "options": {}
       },
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -496,
-        -224
+        -464,
+        -208
       ],
       "id": "cd2c77a7-3b69-438a-b268-46b7c1506267",
       "name": "Loop Over Items"
@@ -184,16 +100,94 @@
       "name": "Parse AI Result"
     },
     {
-      "parameters": {},
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "includeSpamTrash": true,
+          "receivedAfter": "={{$now.minus({hours:12}).toISO()}}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -944,
+        -160
+      ],
+      "id": "200c4b9a-8bbd-43fe-babe-532073a4df1e",
+      "name": "Get many messages1",
+      "webhookId": "19da5b07-76bf-4ac9-8178-752112173989",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "APQOkaXnie1NSekG",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "includeSpamTrash": true,
+          "receivedAfter": "={{$now.minus({hours:12}).toISO()}}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -960,
+        -384
+      ],
+      "id": "c3390be2-e756-4e5a-99ea-8febd49f4028",
+      "name": "Get many messages",
+      "webhookId": "19da5b07-76bf-4ac9-8178-752112173989",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "n5Nmbe0DCxc9cwOq",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "18780453-08cc-40be-b672-5dfb6101e640",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1152,
+        -256
+      ],
+      "id": "6b849989-7257-4d58-bf3d-44533f827b93",
+      "name": "Webhook",
+      "webhookId": "18780453-08cc-40be-b672-5dfb6101e640"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Safely grab all items from both nodes, defaulting to an empty array if one has no data\nconst account1 = $input.all('Get many messages').map(item => item.json);\nconst account2 = $input.all('Get many messages1').map(item => item.json);\n\n// Merge them together cleanly\nconst mergedEmails = [...account1, ...account2];\n\n// Format it back for n8n's loop\nreturn mergedEmails.map(email => ({ json: email }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        -304
+      ],
+      "id": "9c55d165-e1e4-42c4-9d36-d84228b44994",
+      "name": "Merge script"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -160,
-        -272
+        16,
+        96
       ],
-      "id": "49138145-27c8-4fd7-b726-754167df1583",
+      "id": "bc8a4696-e2dc-472f-ba5a-25742a954645",
       "name": "Wait",
-      "webhookId": "c8f254e9-ea16-4a02-9dad-ec4bc650f492"
+      "webhookId": "bfd249d7-70b8-4568-9516-d902f75548f8"
     }
   ],
   "pinData": {},
@@ -204,55 +198,6 @@
           {
             "node": "Basic LLM Chain",
             "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Schedule Trigger": {
-      "main": [
-        [
-          {
-            "node": "Get many messages1",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Get many messages",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get many messages": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get many messages1": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Merge": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
             "index": 0
           }
         ]
@@ -285,7 +230,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -296,7 +241,7 @@
       "main": [
         [
           {
-            "node": "Wait",
+            "node": "Basic LLM Chain",
             "type": "main",
             "index": 0
           }
@@ -314,11 +259,60 @@
         ]
       ]
     },
+    "Get many messages1": {
+      "main": [
+        [
+          {
+            "node": "Merge script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Merge script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get many messages1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge script": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Wait": {
       "main": [
         [
           {
-            "node": "Basic LLM Chain",
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -331,7 +325,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "dd53e291-9367-4416-b126-a3207411cf16",
+  "versionId": "8934ed12-6877-4fb5-9182-146b96b90a1f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "b961653a0ae8e1512e2a2dacccfffa842223f5f1206a08070aa08a103ef05c15"
