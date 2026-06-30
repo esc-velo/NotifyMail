@@ -56,7 +56,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://discord.com/api/webhooks/1518681460695892028/0d-TXrFlxVty2RW0Fh9qUcBc30jikPAfwx7CTfxpJfHuB9LW2Q1Y8MUTn2L6kHiZhGza",
+        "url": "={{$env.DISCORD_WEBHOOK_URL}}",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{\n{\n  \"content\": `## 📅 UPDATE FOR:\n**DATE:** ${$now.setZone('Asia/Kolkata').toFormat('EEEE, MMMM dd, yyyy')}\n**TIME:** ${$now.setZone('Asia/Kolkata').toFormat('hh:mm a')}\n---\n📬 **${$json.ai?.discordTitle || 'No Title'}**\n**From:** ${$(\"Normalize Email\").item.json.senderName || 'Unknown'} <${$(\"Normalize Email\").item.json.senderEmail || 'Unknown'}>\n**Subject:** ${$(\"Normalize Email\").item.json.subject || 'No Subject'}\n**Priority:** ${$json.ai?.priority || 'low'}\n**Category:** ${$json.ai?.category || 'other'}\n\n**Summary:** ${$json.ai?.summary || 'No summary parsed.'}\n**Why it matters:** ${$json.ai?.whyImportant || 'N/A'}\n**Action:** ${$json.ai?.suggestedAction || 'N/A'}\n**Deadline:** ${$json.ai?.deadlineOrTime || 'None'}\n\n🔗 ${$(\"Normalize Email\").item.json.gmailLink || ''}`\n}\n}}",
