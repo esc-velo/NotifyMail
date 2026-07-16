@@ -16,4 +16,4 @@ jobs:
 
       - name: Trigger workflow
         run: |
-          curl -X POST ${{ secrets.N8N_WEBHOOK_URL }}
+          curl -X POST https://notifymail.onrender.com/webhook/fetch-emails
